@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Producer - Test Tube</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080F0D;color:#F5F0E8;font-family:'Libre Franklin',sans-serif;padding:20px;max-width:600px;margin:0 auto}
+h1{font-size:12px;font-weight:800;letter-spacing:3px;color:#C9A84C;margin-bottom:20px}
+.sec{background:rgba(20,43,36,0.8);border:1px solid rgba(74,124,89,0.15);border-radius:12px;padding:16px;margin-bottom:14px}
+.sec-label{font-size:9px;font-weight:800;letter-spacing:2px;color:#C9A84C;margin-bottom:10px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.btn{padding:10px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:'Libre Franklin',sans-serif;border:1px solid rgba(74,124,89,0.25);
+  background:rgba(74,124,89,0.12);color:#A8D5BA;transition:all 0.15s}
+.btn:hover{background:rgba(74,124,89,0.25)}
+.btn:active{transform:scale(0.97)}
+.btn-big{padding:14px;width:100%;font-size:14px;background:linear-gradient(135deg,#2E5A4E,#4A7C59);
+  border-color:#4A7C59;color:#F5F0E8;text-align:center}
+.btn-red{background:rgba(200,60,60,0.1);border-color:rgba(200,60,60,0.2);color:rgba(200,60,60,0.7)}
+.btn-sm{padding:8px 12px;font-size:11px}
+.btn.active{background:rgba(74,124,89,0.3);border-color:#4A7C59;color:#A8D5BA}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat{background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;text-align:center}
+.stat-num{font-size:28px;font-weight:800}
+.stat-lab{font-size:9px;color:#5B8C6B;font-weight:600;margin-top:2px}
+.fill-bar{width:100%;height:12px;background:rgba(255,255,255,0.04);border-radius:6px;overflow:hidden;margin:10px 0}
+.fill-bar-inner{height:100%;background:linear-gradient(90deg,#2A7A52,#5BC88A);border-radius:6px;transition:width 0.4s}
+.host{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.12);border-radius:10px;
+  padding:12px;font-size:12px;line-height:1.6;font-style:italic}
+.miles{display:flex;flex-direction:column;gap:6px}
+.mile-row{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+.conn{display:flex;gap:8px;align-items:center}
+.conn input{flex:1;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);color:#F5F0E8;font-family:'Libre Franklin',sans-serif;
+  font-size:13px;outline:none}
+.conn-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px}
+.conn-on{background:rgba(74,124,89,0.2);color:#A8D5BA;border:1px solid rgba(74,124,89,0.3)}
+.conn-off{background:rgba(200,60,60,0.1);color:rgba(200,60,60,0.7);border:1px solid rgba(200,60,60,0.2)}
+</style>
+</head>
+<body>
+
+<h1>TEST TUBE PRODUCER CONTROLS</h1>
+
+<div class="sec">
+  <div class="sec-label">TIKTOK CONNECTION</div>
+  <div style="margin-bottom:8px"><span class="conn-badge conn-off" id="conn">DISCONNECTED</span></div>
+  <div class="conn">
+    <input type="text" id="tt-user" placeholder="TikTok username (no @)">
+    <button class="btn btn-sm" onclick="doConnect()">Connect</button>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-label">TUBE STATUS</div>
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-num" id="s-pct">0%</div><div class="stat-lab">Fill level</div></div>
+    <div class="stat"><div class="stat-num" id="s-clicks">0</div><div class="stat-lab">Clicks</div></div>
+    <div class="stat"><div class="stat-num" id="s-target">500</div><div class="stat-lab">Target</div></div>
+  </div>
+  <div class="fill-bar"><div class="fill-bar-inner" id="fill-bar" style="width:0%"></div></div>
+  <div class="miles" id="miles"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-label">SET TARGET</div>
+  <div class="row" id="target-btns"></div>
+</div>
+
+<div class="sec">
+  <div class="sec-label">ADD CLICKS (USE WHEN YOU SEE ORDERS COME IN)</div>
+  <div class="row">
+    <button class="btn" onclick="socket.emit('add',1)">+1</button>
+    <button class="btn" onclick="socket.emit('add',5)">+5</button>
+    <button class="btn" onclick="socket.emit('add',10)">+10</button>
+    <button class="btn" onclick="socket.emit('add',25)">+25</button>
+    <button class="btn" onclick="socket.emit('add',50)">+50</button>
+    <button class="btn" onclick="socket.emit('add',100)">+100</button>
+  </div>
+  <div style="margin-top:10px">
+    <button class="btn btn-big" id="auto-btn" onclick="autoFill()">Auto-fill demo (5 sec)</button>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-label">HOST READS THIS</div>
+  <div class="host" id="host">Waiting...</div>
+</div>
+
+<div class="sec">
+  <button class="btn btn-red" style="width:100%" onclick="doReset()">Reset tube (new mega loop)</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+var socket = io();
+
+var MILES = [
+  {pct:25, label:"Flash sale unlocked", detail:"20% OFF"},
+  {pct:50, label:"Bundle deal drops", detail:"2-pack 25% OFF"},
+  {pct:75, label:"Free shipping", detail:"All bundles"},
+  {pct:100, label:"Max potency deal", detail:"30% OFF everything"},
+];
+var TARGETS = [200, 500, 1000, 2000];
+var currentTarget = 500;
+var autoRunning = false;
+
+var tBtns = document.getElementById("target-btns");
+TARGETS.forEach(function(t) {
+  var b = document.createElement("button");
+  b.className = "btn btn-sm" + (t === 500 ? " active" : "");
+  b.textContent = t;
+  b.onclick = function() {
+    currentTarget = t;
+    socket.emit("set_target", t);
+    var all = tBtns.querySelectorAll(".btn");
+    for (var i = 0; i < all.length; i++) {
+      all[i].classList.toggle("active", TARGETS[i] === t);
+    }
+  };
+  tBtns.appendChild(b);
+});
+
+var milesEl = document.getElementById("miles");
+MILES.forEach(function(m, i) {
+  var d = document.createElement("div");
+  d.className = "mile-row";
+  d.id = "mr" + i;
+  d.innerHTML = "<span>&#x2B1C;</span> <span>" + m.pct + "% - " + m.label + " (" + m.detail + ")</span>";
+  milesEl.appendChild(d);
+});
+
+function updateUI(s) {
+  document.getElementById("s-pct").textContent = s.fillPct + "%";
+  document.getElementById("s-clicks").textContent = s.clicks.toLocaleString();
+  document.getElementById("s-target").textContent = s.target.toLocaleString();
+  document.getElementById("fill-bar").style.width = Math.min(s.fillPct, 100) + "%";
+
+  s.milestones.forEach(function(on, i) {
+    var el = document.getElementById("mr" + i);
+    el.querySelector("span").innerHTML = on ? "&#x2705;" : "&#x2B1C;";
+  });
+
+  var p = s.fillPct;
+  var remaining = Math.max(s.target - s.clicks, 0);
+  var h = document.getElementById("host");
+  if (p < 25) {
+    h.textContent = "\"We need " + remaining + " more to unlock the first deal. Tap the product link - you don't have to buy, just look.\"";
+  } else if (p < 50) {
+    h.textContent = "\"Flash sale is LIVE - 20% off. But we keep going - at 50% the bundle deal drops. Keep tapping.\"";
+  } else if (p < 75) {
+    h.textContent = "\"2-pack at 25% off. We're at " + p + "% - free shipping unlocks at 75%. Almost there.\"";
+  } else if (p < 100) {
+    h.textContent = "\"Free shipping UNLOCKED. " + remaining + " more to max potency - 30% off everything. Fill the tube.\"";
+  } else {
+    h.textContent = "\"TUBE IS FULL. 30% off everything. Free shipping. This is the best deal we've ever done live. Tap. The. Link.\"";
+  }
+
+  currentTarget = s.target;
+}
+
+function autoFill() {
+  if (autoRunning) return;
+  autoRunning = true;
+  var btn = document.getElementById("auto-btn");
+  btn.textContent = "Running...";
+  btn.style.opacity = "0.5";
+
+  var i = 0;
+  var step = Math.max(Math.ceil(currentTarget / 50), 1);
+  var iv = setInterval(function() {
+    if (i++ >= 50) {
+      clearInterval(iv);
+      autoRunning = false;
+      btn.textContent = "Auto-fill demo (5 sec)";
+      btn.style.opacity = "1";
+      return;
+    }
+    socket.emit("add", step);
+  }, 100);
+}
+
+function doConnect() {
+  var u = document.getElementById("tt-user").value.trim().replace("@", "");
+  if (u) socket.emit("connect_tt", u);
+}
+
+function doReset() {
+  if (confirm("Reset tube? This clears all progress.")) {
+    socket.emit("reset");
+  }
+}
+
+socket.on("state", updateUI);
+socket.on("tt_status", function(s) {
+  var el = document.getElementById("conn");
+  if (s.connected) {
+    el.textContent = "LIVE - @" + s.user;
+    el.className = "conn-badge conn-on";
+  } else {
+    el.textContent = s.error || "DISCONNECTED";
+    el.className = "conn-badge conn-off";
+  }
+});
+</script>
+</body>
+</html>
