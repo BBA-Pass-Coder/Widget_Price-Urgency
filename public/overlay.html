@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Root Labs Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:transparent;overflow:hidden;font-family:'Libre Franklin',sans-serif}
+
+.card{
+  position:fixed;bottom:20px;right:20px;
+  width:320px;
+  background:rgba(15,31,26,0.90);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(74,124,89,0.25);
+  border-radius:18px;
+  padding:16px 18px;
+  color:#F5F0E8;
+}
+.gold-line{position:absolute;top:0;left:15%;right:15%;height:1px;
+  background:linear-gradient(90deg,transparent,#C9A84C,transparent);opacity:0.4}
+
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.brand{display:flex;align-items:center;gap:5px;font-size:8px;font-weight:800;letter-spacing:3px;opacity:0.6}
+.pct{font-family:'Playfair Display',serif;font-size:20px;font-weight:800}
+
+.main{display:flex;gap:6px;align-items:flex-end}
+.tube-wrap{position:relative;width:72px;height:260px;flex-shrink:0}
+
+.miles{flex:1;position:relative;height:260px}
+.mile{position:absolute;left:0;right:0;display:flex;align-items:center;gap:6px;transition:all 0.4s}
+.mile-line{width:14px;height:1px;transition:background 0.4s}
+.mile-label{font-size:10px;font-weight:700;display:flex;align-items:center;gap:3px;transition:color 0.4s}
+.mile-detail{font-size:9px;font-weight:600;margin-top:1px;transition:color 0.4s}
+.mile.on .mile-line{background:#C9A84C}
+.mile.off .mile-line{background:rgba(168,213,186,0.15)}
+.mile.on .mile-label{color:#C9A84C}
+.mile.off .mile-label{color:rgba(245,240,232,0.25)}
+.mile.on .mile-detail{color:#A8D5BA}
+.mile.off .mile-detail{color:rgba(168,213,186,0.15)}
+
+.stats{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.04);
+  display:flex;align-items:baseline;gap:8px}
+.stats-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:800}
+.stats-of{font-size:11px;color:#5B8C6B;font-weight:600;opacity:0.6}
+
+.cta{margin-top:8px;font-size:11px;font-weight:700;color:#C9A84C;
+  animation:pulse 2s ease-in-out infinite}
+
+@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+@keyframes bubbleUp{
+  0%{opacity:0.4;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-240px) scale(0.3)}
+}
+@keyframes beadFloat{
+  0%,100%{transform:translateY(0) translateX(0)}
+  33%{transform:translateY(-5px) translateX(2px)}
+  66%{transform:translateY(-2px) translateX(-2px)}
+}
+@keyframes burstOut{
+  0%{opacity:1;transform:rotate(var(--a)) translateY(0)}
+  100%{opacity:0;transform:rotate(var(--a)) translateY(calc(var(--d)*-1))}
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="gold-line"></div>
+  <div class="head">
+    <div class="brand"><span style="font-size:12px">🧪</span> ABSORPTION LAB</div>
+    <div class="pct" id="pct">0%</div>
+  </div>
+
+  <div class="main">
+    <div class="tube-wrap">
+      <!--
+        Tube geometry:
+        - Fillable area: y=14 (top) to y=240 (bottom) = 226px
+        - 25% fill line: y = 240 - (0.25 * 226) = 183
+        - 50% fill line: y = 240 - (0.50 * 226) = 127
+        - 75% fill line: y = 240 - (0.75 * 226) = 71
+      -->
+      <svg id="tube-svg" width="72" height="260" viewBox="0 0 72 260">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#5BC88A" stop-opacity="0.85"/>
+            <stop offset="100%" stop-color="#2A7A52" stop-opacity="0.95"/>
+          </linearGradient>
+          <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.07)"/>
+            <stop offset="30%" stop-color="rgba(255,255,255,0.02)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.04)"/>
+          </linearGradient>
+          <clipPath id="tc">
+            <rect x="6" y="14" width="60" height="226" rx="6"/>
+            <ellipse cx="36" cy="240" rx="31" ry="10"/>
+          </clipPath>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/>
+            <feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+        </defs>
+        <rect x="6" y="10" width="60" height="230" rx="6" fill="url(#glass)" stroke="rgba(168,213,186,0.15)" stroke-width="1.2"/>
+        <ellipse cx="36" cy="240" rx="30" ry="9" fill="url(#glass)" stroke="rgba(168,213,186,0.15)" stroke-width="1.2"/>
+        <g clip-path="url(#tc)">
+          <rect id="liquid" x="7" y="240" width="58" height="0" fill="url(#lg)" filter="url(#glow)"/>
+          <ellipse id="surface" cx="36" cy="240" rx="28" ry="3" fill="#5BC88A" opacity="0"/>
+        </g>
+        <rect x="2" y="6" width="68" height="10" rx="3" fill="rgba(168,213,186,0.07)" stroke="rgba(168,213,186,0.18)" stroke-width="0.8"/>
+        <rect x="12" y="18" width="3" height="200" rx="1.5" fill="rgba(255,255,255,0.05)"/>
+        <!-- BUG FIX #6: corrected tick Y positions to match actual fill levels -->
+        <line x1="6" y1="71"  x2="14" y2="71"  stroke="rgba(168,213,186,0.2)" stroke-width="0.7" id="tick75"/>
+        <line x1="6" y1="127" x2="14" y2="127" stroke="rgba(168,213,186,0.2)" stroke-width="0.7" id="tick50"/>
+        <line x1="6" y1="183" x2="14" y2="183" stroke="rgba(168,213,186,0.2)" stroke-width="0.7" id="tick25"/>
+      </svg>
+      <div id="bubbles" style="position:absolute;left:7px;bottom:12px;width:58px;height:226px;overflow:hidden;pointer-events:none"></div>
+      <div id="beadlets" style="position:absolute;left:7px;bottom:12px;width:58px;height:226px;overflow:hidden;pointer-events:none"></div>
+      <div id="burst" style="position:absolute;left:36px;top:130px;pointer-events:none"></div>
+    </div>
+
+    <div class="miles">
+      <!-- BUG FIX #7: corrected bottom positions to align with tube fill levels
+           Tube bottom = ~20px from bottom of 260px container
+           Tube top    = ~246px from bottom
+           Range = 226px. 25% = 77px, 50% = 133px, 75% = 190px, 100% = 246px
+           Subtract ~12px to center label on the line -->
+      <div class="mile off" id="m3" style="bottom:234px">
+        <div class="mile-line"></div>
+        <div><div class="mile-label"><span>🧬</span> Max potency deal</div><div class="mile-detail">30% OFF everything</div></div>
+      </div>
+      <div class="mile off" id="m2" style="bottom:178px">
+        <div class="mile-line"></div>
+        <div><div class="mile-label"><span>📦</span> Free shipping</div><div class="mile-detail">On all bundles</div></div>
+      </div>
+      <div class="mile off" id="m1" style="bottom:121px">
+        <div class="mile-line"></div>
+        <div><div class="mile-label"><span>🔬</span> Bundle deal drops</div><div class="mile-detail">2-pack at 25% OFF</div></div>
+      </div>
+      <div class="mile off" id="m0" style="bottom:65px">
+        <div class="mile-line"></div>
+        <div><div class="mile-label"><span>⚡</span> Flash sale unlocked</div><div class="mile-detail">20% OFF live now</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <span class="stats-num" id="clicks">0</span>
+    <span class="stats-of">/ <span id="target">500</span> to fill the tube</span>
+  </div>
+  <div class="cta">Tap the product link to fill the tube</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+var socket = io();
+
+var liquid = document.getElementById("liquid");
+var surface = document.getElementById("surface");
+var pctEl = document.getElementById("pct");
+var clicksEl = document.getElementById("clicks");
+var targetEl = document.getElementById("target");
+var bubblesEl = document.getElementById("bubbles");
+var beadletsEl = document.getElementById("beadlets");
+var burstEl = document.getElementById("burst");
+var ticks = [document.getElementById("tick25"), document.getElementById("tick50"), document.getElementById("tick75")];
+
+var prevMilestones = [false, false, false, false];
+var beadletsCreated = false;
+var currentFillPct = 0;
+
+function updateUI(s) {
+  var pct = s.fillPct;
+  currentFillPct = pct;
+  var maxH = 226;
+  var h = (pct / 100) * maxH;
+  var y = 240 - h;
+
+  liquid.setAttribute("height", h);
+  liquid.setAttribute("y", y);
+
+  if (pct > 3) {
+    surface.setAttribute("cy", y);
+    surface.setAttribute("opacity", "0.35");
+  } else {
+    surface.setAttribute("opacity", "0");
+  }
+
+  pctEl.textContent = pct + "%";
+  clicksEl.textContent = s.clicks.toLocaleString();
+  targetEl.textContent = s.target.toLocaleString();
+
+  [25, 50, 75].forEach(function(m, i) {
+    ticks[i].setAttribute("stroke", pct >= m ? "#C9A84C" : "rgba(168,213,186,0.2)");
+    ticks[i].setAttribute("stroke-width", pct >= m ? "1.5" : "0.7");
+  });
+
+  s.milestones.forEach(function(reached, i) {
+    var el = document.getElementById("m" + i);
+    el.className = "mile " + (reached ? "on" : "off");
+    if (reached && !prevMilestones[i]) fireBurst();
+  });
+  prevMilestones = s.milestones.slice();
+
+  // BUG FIX #8: recreate beadlets when fill changes, positioned within liquid area
+  if (pct > 8) {
+    updateBeadlets(pct);
+  }
+  if (pct <= 5 && beadletsCreated) {
+    beadletsEl.innerHTML = "";
+    beadletsCreated = false;
+  }
+
+  if (pct > 5) spawnBubble();
+}
+
+function updateBeadlets(pct) {
+  if (!beadletsCreated) {
+    beadletsCreated = true;
+    for (var i = 0; i < 7; i++) {
+      var b = document.createElement("div");
+      var sz = 4 + Math.random() * 5;
+      // BUG FIX #8: position beadlets only in lower 60% of current fill level
+      var maxBottom = Math.min(pct * 0.6, 50);
+      b.style.cssText = "position:absolute;bottom:" + (2 + Math.random() * maxBottom) + "%;" +
+        "left:" + (10 + Math.random() * 70) + "%;" +
+        "width:" + sz + "px;height:" + sz + "px;border-radius:50%;" +
+        "background:radial-gradient(circle at 35% 35%,rgba(168,213,186,0.6),rgba(61,158,110,0.25));" +
+        "animation:beadFloat " + (2 + i * 0.5) + "s ease-in-out " + (i * 0.3) + "s infinite;" +
+        "opacity:" + (0.5 + Math.random() * 0.4);
+      b.setAttribute("data-beadlet", "1");
+      beadletsEl.appendChild(b);
+    }
+  }
+}
+
+function spawnBubble() {
+  if (bubblesEl.children.length > 6) return;
+  var b = document.createElement("div");
+  var sz = 3 + Math.random() * 4;
+  b.style.cssText = "position:absolute;bottom:0;left:" + (15 + Math.random() * 60) + "%;" +
+    "width:" + sz + "px;height:" + sz + "px;border-radius:50%;" +
+    "border:1px solid rgba(168,213,186,0.25);background:rgba(168,213,186,0.04);" +
+    "animation:bubbleUp " + (2 + Math.random() * 2) + "s ease-out forwards";
+  bubblesEl.appendChild(b);
+  setTimeout(function() { if (b.parentNode) b.parentNode.removeChild(b); }, 4000);
+}
+
+function fireBurst() {
+  burstEl.innerHTML = "";
+  for (var i = 0; i < 10; i++) {
+    var p = document.createElement("div");
+    var c = i % 2 === 0 ? "#C9A84C" : "#A8D5BA";
+    p.style.cssText = "position:absolute;width:4px;height:4px;border-radius:50%;background:" + c + ";" +
+      "--a:" + (i * 36) + "deg;--d:" + (25 + Math.random() * 25) + "px;" +
+      "animation:burstOut 0.7s " + (i * 0.03) + "s ease-out forwards;opacity:0";
+    burstEl.appendChild(p);
+  }
+  setTimeout(function() { burstEl.innerHTML = ""; }, 1000);
+}
+
+setInterval(function() { if (currentFillPct > 5) spawnBubble(); }, 800);
+
+socket.on("state", updateUI);
+</script>
+</body>
+</html>
