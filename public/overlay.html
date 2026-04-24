@@ -3,264 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Root Labs Overlay</title>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<title>Root Labs - Price Urgency</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:transparent;overflow:hidden;font-family:'Libre Franklin',sans-serif}
 
 .card{
-  position:fixed;bottom:20px;right:20px;
-  width:320px;
-  background:rgba(15,31,26,0.90);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  position:fixed;top:20px;right:20px;
+  width:300px;
+  background:rgba(15,31,26,0.92);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border:1px solid rgba(74,124,89,0.25);
   border-radius:18px;
-  padding:16px 18px;
+  padding:18px 20px;
   color:#F5F0E8;
+  transition:border-color 0.6s, box-shadow 0.6s;
 }
+.card.amber{border-color:rgba(201,168,76,0.45);box-shadow:0 0 24px rgba(201,168,76,0.12)}
+.card.red{border-color:rgba(220,80,80,0.6);box-shadow:0 0 28px rgba(220,80,80,0.18);animation:redPulse 2s ease-in-out infinite}
+.card.ended{border-color:rgba(100,100,100,0.4)}
+
+@keyframes redPulse{0%,100%{box-shadow:0 0 28px rgba(220,80,80,0.15)}50%{box-shadow:0 0 36px rgba(220,80,80,0.3)}}
+
 .gold-line{position:absolute;top:0;left:15%;right:15%;height:1px;
   background:linear-gradient(90deg,transparent,#C9A84C,transparent);opacity:0.4}
 
-.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.brand{display:flex;align-items:center;gap:5px;font-size:8px;font-weight:800;letter-spacing:3px;opacity:0.6}
-.pct{font-family:'Playfair Display',serif;font-size:20px;font-weight:800}
+.head{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:800;letter-spacing:2.5px;
+  color:#C9A84C;margin-bottom:12px;text-transform:uppercase}
+.head .ic{font-size:12px}
 
-.main{display:flex;gap:6px;align-items:flex-end}
-.tube-wrap{position:relative;width:72px;height:260px;flex-shrink:0}
+.timer{font-family:'Playfair Display',serif;font-size:44px;font-weight:800;
+  line-height:1;letter-spacing:-1px;text-align:center;margin:6px 0 14px;
+  transition:color 0.6s}
+.card.amber .timer{color:#E8C165}
+.card.red .timer{color:#F08080}
 
-.miles{flex:1;position:relative;height:260px}
-.mile{position:absolute;left:0;right:0;display:flex;align-items:center;gap:6px;transition:all 0.4s}
-.mile-line{width:14px;height:1px;transition:background 0.4s}
-.mile-label{font-size:10px;font-weight:700;display:flex;align-items:center;gap:3px;transition:color 0.4s}
-.mile-detail{font-size:9px;font-weight:600;margin-top:1px;transition:color 0.4s}
-.mile.on .mile-line{background:#C9A84C}
-.mile.off .mile-line{background:rgba(168,213,186,0.15)}
-.mile.on .mile-label{color:#C9A84C}
-.mile.off .mile-label{color:rgba(245,240,232,0.25)}
-.mile.on .mile-detail{color:#A8D5BA}
-.mile.off .mile-detail{color:rgba(168,213,186,0.15)}
+.stock-wrap{margin-top:10px}
+.stock-label{display:flex;justify-content:space-between;align-items:center;
+  font-size:11px;font-weight:700;margin-bottom:5px}
+.stock-count{font-family:'Playfair Display',serif;font-size:15px}
+.stock-bar{width:100%;height:6px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden}
+.stock-fill{height:100%;background:linear-gradient(90deg,#2A7A52,#5BC88A);
+  border-radius:4px;transition:width 0.5s, background 0.5s}
+.card.amber .stock-fill{background:linear-gradient(90deg,#8C6A1E,#C9A84C)}
+.card.red .stock-fill{background:linear-gradient(90deg,#8C2A2A,#DC5050)}
 
-.stats{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.04);
-  display:flex;align-items:baseline;gap:8px}
-.stats-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:800}
-.stats-of{font-size:11px;color:#5B8C6B;font-weight:600;opacity:0.6}
+.footer{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);
+  display:flex;justify-content:space-between;font-size:10px;color:rgba(168,213,186,0.6);font-weight:600}
+.footer .was{text-decoration:line-through;opacity:0.5}
+.footer .now{color:#C9A84C}
 
-.cta{margin-top:8px;font-size:11px;font-weight:700;color:#C9A84C;
-  animation:pulse 2s ease-in-out infinite}
+/* ENDED STATE */
+.ended-card{display:none}
+.card.ended .live-card{display:none}
+.card.ended .ended-card{display:block}
 
-@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
-@keyframes bubbleUp{
-  0%{opacity:0.4;transform:translateY(0) scale(1)}
-  100%{opacity:0;transform:translateY(-240px) scale(0.3)}
-}
-@keyframes beadFloat{
-  0%,100%{transform:translateY(0) translateX(0)}
-  33%{transform:translateY(-5px) translateX(2px)}
-  66%{transform:translateY(-2px) translateX(-2px)}
-}
-@keyframes burstOut{
-  0%{opacity:1;transform:rotate(var(--a)) translateY(0)}
-  100%{opacity:0;transform:rotate(var(--a)) translateY(calc(var(--d)*-1))}
-}
+.ended-label{font-size:10px;font-weight:800;letter-spacing:2px;color:#C9A84C;
+  text-align:center;margin-bottom:10px;text-transform:uppercase}
+.ended-price{font-family:'Playfair Display',serif;font-size:52px;font-weight:800;
+  text-align:center;color:#C9A84C;line-height:1;margin-bottom:8px}
+.ended-msg{font-size:11px;text-align:center;color:rgba(245,240,232,0.7);line-height:1.5}
+.ended-was{text-align:center;margin-top:10px;font-size:10px;color:rgba(168,213,186,0.5)}
+.ended-was .strike{text-decoration:line-through}
+
 </style>
 </head>
 <body>
-<div class="card">
+<div class="card" id="card">
   <div class="gold-line"></div>
-  <div class="head">
-    <div class="brand"><span style="font-size:12px">🧪</span> ABSORPTION LAB</div>
-    <div class="pct" id="pct">0%</div>
-  </div>
 
-  <div class="main">
-    <div class="tube-wrap">
-      <!--
-        Tube geometry:
-        - Fillable area: y=14 (top) to y=240 (bottom) = 226px
-        - 25% fill line: y = 240 - (0.25 * 226) = 183
-        - 50% fill line: y = 240 - (0.50 * 226) = 127
-        - 75% fill line: y = 240 - (0.75 * 226) = 71
-      -->
-      <svg id="tube-svg" width="72" height="260" viewBox="0 0 72 260">
-        <defs>
-          <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#5BC88A" stop-opacity="0.85"/>
-            <stop offset="100%" stop-color="#2A7A52" stop-opacity="0.95"/>
-          </linearGradient>
-          <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="rgba(255,255,255,0.07)"/>
-            <stop offset="30%" stop-color="rgba(255,255,255,0.02)"/>
-            <stop offset="100%" stop-color="rgba(255,255,255,0.04)"/>
-          </linearGradient>
-          <clipPath id="tc">
-            <rect x="6" y="14" width="60" height="226" rx="6"/>
-            <ellipse cx="36" cy="240" rx="31" ry="10"/>
-          </clipPath>
-          <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/>
-            <feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
-        </defs>
-        <rect x="6" y="10" width="60" height="230" rx="6" fill="url(#glass)" stroke="rgba(168,213,186,0.15)" stroke-width="1.2"/>
-        <ellipse cx="36" cy="240" rx="30" ry="9" fill="url(#glass)" stroke="rgba(168,213,186,0.15)" stroke-width="1.2"/>
-        <g clip-path="url(#tc)">
-          <rect id="liquid" x="7" y="240" width="58" height="0" fill="url(#lg)" filter="url(#glow)"/>
-          <ellipse id="surface" cx="36" cy="240" rx="28" ry="3" fill="#5BC88A" opacity="0"/>
-        </g>
-        <rect x="2" y="6" width="68" height="10" rx="3" fill="rgba(168,213,186,0.07)" stroke="rgba(168,213,186,0.18)" stroke-width="0.8"/>
-        <rect x="12" y="18" width="3" height="200" rx="1.5" fill="rgba(255,255,255,0.05)"/>
-        <!-- BUG FIX #6: corrected tick Y positions to match actual fill levels -->
-        <line x1="6" y1="71"  x2="14" y2="71"  stroke="rgba(168,213,186,0.2)" stroke-width="0.7" id="tick75"/>
-        <line x1="6" y1="127" x2="14" y2="127" stroke="rgba(168,213,186,0.2)" stroke-width="0.7" id="tick50"/>
-        <line x1="6" y1="183" x2="14" y2="183" stroke="rgba(168,213,186,0.2)" stroke-width="0.7" id="tick25"/>
-      </svg>
-      <div id="bubbles" style="position:absolute;left:7px;bottom:12px;width:58px;height:226px;overflow:hidden;pointer-events:none"></div>
-      <div id="beadlets" style="position:absolute;left:7px;bottom:12px;width:58px;height:226px;overflow:hidden;pointer-events:none"></div>
-      <div id="burst" style="position:absolute;left:36px;top:130px;pointer-events:none"></div>
+  <!-- LIVE / ACTIVE STATE -->
+  <div class="live-card">
+    <div class="head">
+      <span class="ic">⚡</span>
+      <span id="head-label">LIVE PRICE ENDS IN</span>
+    </div>
+    <div class="timer" id="timer">--:--</div>
+
+    <div class="stock-wrap">
+      <div class="stock-label">
+        <span id="stock-text">-- bags left at <span id="live-price-in-stock">$20</span></span>
+        <span class="stock-count"><span id="stock-remaining">0</span>/<span id="stock-initial">0</span></span>
+      </div>
+      <div class="stock-bar"><div class="stock-fill" id="stock-fill" style="width:0%"></div></div>
     </div>
 
-    <div class="miles">
-      <!-- BUG FIX #7: corrected bottom positions to align with tube fill levels
-           Tube bottom = ~20px from bottom of 260px container
-           Tube top    = ~246px from bottom
-           Range = 226px. 25% = 77px, 50% = 133px, 75% = 190px, 100% = 246px
-           Subtract ~12px to center label on the line -->
-      <div class="mile off" id="m3" style="bottom:234px">
-        <div class="mile-line"></div>
-        <div><div class="mile-label"><span>🧬</span> Max potency deal</div><div class="mile-detail">30% OFF everything</div></div>
-      </div>
-      <div class="mile off" id="m2" style="bottom:178px">
-        <div class="mile-line"></div>
-        <div><div class="mile-label"><span>📦</span> Free shipping</div><div class="mile-detail">On all bundles</div></div>
-      </div>
-      <div class="mile off" id="m1" style="bottom:121px">
-        <div class="mile-line"></div>
-        <div><div class="mile-label"><span>🔬</span> Bundle deal drops</div><div class="mile-detail">2-pack at 25% OFF</div></div>
-      </div>
-      <div class="mile off" id="m0" style="bottom:65px">
-        <div class="mile-line"></div>
-        <div><div class="mile-label"><span>⚡</span> Flash sale unlocked</div><div class="mile-detail">20% OFF live now</div></div>
-      </div>
+    <div class="footer">
+      <span>Regular <span class="was" id="f-reg">$27</span></span>
+      <span>Flash <span id="f-flash">$24</span></span>
+      <span>Live <span class="now" id="f-live">$20</span></span>
     </div>
   </div>
 
-  <div class="stats">
-    <span class="stats-num" id="clicks">0</span>
-    <span class="stats-of">/ <span id="target">500</span> to fill the tube</span>
+  <!-- ENDED STATE -->
+  <div class="ended-card">
+    <div class="ended-label" id="ended-reason">$20 LIVE PRICE ENDED</div>
+    <div class="ended-price" id="ended-now-price">$24</div>
+    <div class="ended-msg" id="ended-msg">Back to flash sale price. Still below regular.</div>
+    <div class="ended-was">
+      <span class="strike" id="ended-was-live">$20</span> · Regular <span class="strike" id="ended-was-reg">$27</span>
+    </div>
   </div>
-  <div class="cta">Tap the product link to fill the tube</div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
 var socket = io();
+var state = null;
 
-var liquid = document.getElementById("liquid");
-var surface = document.getElementById("surface");
-var pctEl = document.getElementById("pct");
-var clicksEl = document.getElementById("clicks");
-var targetEl = document.getElementById("target");
-var bubblesEl = document.getElementById("bubbles");
-var beadletsEl = document.getElementById("beadlets");
-var burstEl = document.getElementById("burst");
-var ticks = [document.getElementById("tick25"), document.getElementById("tick50"), document.getElementById("tick75")];
+function fmtTime(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  var h = Math.floor(sec / 3600);
+  var m = Math.floor((sec % 3600) / 60);
+  var s = sec % 60;
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  if (h > 0) return h + ":" + pad(m) + ":" + pad(s);
+  return pad(m) + ":" + pad(s);
+}
 
-var prevMilestones = [false, false, false, false];
-var beadletsCreated = false;
-var currentFillPct = 0;
+function getRemainingSec() {
+  if (!state) return 0;
+  if (state.timerRunning && state.timerEndsAt) {
+    return Math.max(0, Math.floor((state.timerEndsAt - Date.now()) / 1000));
+  }
+  return state.timerPausedRemainingSec || 0;
+}
 
-function updateUI(s) {
-  var pct = s.fillPct;
-  currentFillPct = pct;
-  var maxH = 226;
-  var h = (pct / 100) * maxH;
-  var y = 240 - h;
+function render() {
+  if (!state) return;
+  var card = document.getElementById("card");
 
-  liquid.setAttribute("height", h);
-  liquid.setAttribute("y", y);
+  if (!state.priceActive) {
+    card.className = "card ended";
+    var reasonEl = document.getElementById("ended-reason");
+    if (state.endReason === "stock") reasonEl.textContent = state.priceLive + " SOLD OUT";
+    else if (state.endReason === "timer") reasonEl.textContent = state.priceLive + " WINDOW CLOSED";
+    else reasonEl.textContent = state.priceLive + " LIVE PRICE ENDED";
+    document.getElementById("ended-now-price").textContent = state.priceFlash;
+    document.getElementById("ended-was-live").textContent = state.priceLive;
+    document.getElementById("ended-was-reg").textContent = state.priceRegular;
+    document.getElementById("ended-msg").textContent =
+      "Back to flash sale price. Still below regular.";
+    return;
+  }
 
-  if (pct > 3) {
-    surface.setAttribute("cy", y);
-    surface.setAttribute("opacity", "0.35");
+  var remainingSec = getRemainingSec();
+  var stockRemaining = Math.max(0, state.stockInitial - state.stockSold);
+  var stockPct = state.stockInitial > 0
+    ? Math.round((stockRemaining / state.stockInitial) * 100)
+    : 0;
+
+  // URGENCY STATE — red if <5min OR <20% stock; amber if <20min OR <50% stock
+  var urgency = "";
+  var timeUrg = state.timerRunning && remainingSec > 0
+    ? (remainingSec < 300 ? "red" : (remainingSec < 1200 ? "amber" : ""))
+    : "";
+  var stockUrg = stockPct < 20 ? "red" : (stockPct < 50 ? "amber" : "");
+  // take the more urgent of the two
+  if (timeUrg === "red" || stockUrg === "red") urgency = "red";
+  else if (timeUrg === "amber" || stockUrg === "amber") urgency = "amber";
+  card.className = "card" + (urgency ? " " + urgency : "");
+
+  // TIMER
+  if (state.timerRunning) {
+    document.getElementById("head-label").textContent = state.priceLive + " LIVE PRICE ENDS IN";
+    document.getElementById("timer").textContent = fmtTime(remainingSec);
   } else {
-    surface.setAttribute("opacity", "0");
+    document.getElementById("head-label").textContent = state.priceLive + " LIVE PRICE — TIMER PAUSED";
+    document.getElementById("timer").textContent = fmtTime(state.timerPausedRemainingSec);
   }
 
-  pctEl.textContent = pct + "%";
-  clicksEl.textContent = s.clicks.toLocaleString();
-  targetEl.textContent = s.target.toLocaleString();
+  // STOCK
+  document.getElementById("stock-text").innerHTML =
+    stockRemaining + " bags left at <span>" + state.priceLive + "</span>";
+  document.getElementById("stock-remaining").textContent = stockRemaining;
+  document.getElementById("stock-initial").textContent = state.stockInitial;
+  document.getElementById("stock-fill").style.width = stockPct + "%";
 
-  [25, 50, 75].forEach(function(m, i) {
-    ticks[i].setAttribute("stroke", pct >= m ? "#C9A84C" : "rgba(168,213,186,0.2)");
-    ticks[i].setAttribute("stroke-width", pct >= m ? "1.5" : "0.7");
-  });
-
-  s.milestones.forEach(function(reached, i) {
-    var el = document.getElementById("m" + i);
-    el.className = "mile " + (reached ? "on" : "off");
-    if (reached && !prevMilestones[i]) fireBurst();
-  });
-  prevMilestones = s.milestones.slice();
-
-  // BUG FIX #8: recreate beadlets when fill changes, positioned within liquid area
-  if (pct > 8) {
-    updateBeadlets(pct);
-  }
-  if (pct <= 5 && beadletsCreated) {
-    beadletsEl.innerHTML = "";
-    beadletsCreated = false;
-  }
-
-  if (pct > 5) spawnBubble();
+  // FOOTER PRICES
+  document.getElementById("f-reg").textContent = state.priceRegular;
+  document.getElementById("f-flash").textContent = state.priceFlash;
+  document.getElementById("f-live").textContent = state.priceLive;
+  document.getElementById("live-price-in-stock").textContent = state.priceLive;
 }
 
-function updateBeadlets(pct) {
-  if (!beadletsCreated) {
-    beadletsCreated = true;
-    for (var i = 0; i < 7; i++) {
-      var b = document.createElement("div");
-      var sz = 4 + Math.random() * 5;
-      // BUG FIX #8: position beadlets only in lower 60% of current fill level
-      var maxBottom = Math.min(pct * 0.6, 50);
-      b.style.cssText = "position:absolute;bottom:" + (2 + Math.random() * maxBottom) + "%;" +
-        "left:" + (10 + Math.random() * 70) + "%;" +
-        "width:" + sz + "px;height:" + sz + "px;border-radius:50%;" +
-        "background:radial-gradient(circle at 35% 35%,rgba(168,213,186,0.6),rgba(61,158,110,0.25));" +
-        "animation:beadFloat " + (2 + i * 0.5) + "s ease-in-out " + (i * 0.3) + "s infinite;" +
-        "opacity:" + (0.5 + Math.random() * 0.4);
-      b.setAttribute("data-beadlet", "1");
-      beadletsEl.appendChild(b);
-    }
-  }
-}
+socket.on("state", function(s) {
+  state = s;
+  render();
+});
 
-function spawnBubble() {
-  if (bubblesEl.children.length > 6) return;
-  var b = document.createElement("div");
-  var sz = 3 + Math.random() * 4;
-  b.style.cssText = "position:absolute;bottom:0;left:" + (15 + Math.random() * 60) + "%;" +
-    "width:" + sz + "px;height:" + sz + "px;border-radius:50%;" +
-    "border:1px solid rgba(168,213,186,0.25);background:rgba(168,213,186,0.04);" +
-    "animation:bubbleUp " + (2 + Math.random() * 2) + "s ease-out forwards";
-  bubblesEl.appendChild(b);
-  setTimeout(function() { if (b.parentNode) b.parentNode.removeChild(b); }, 4000);
-}
-
-function fireBurst() {
-  burstEl.innerHTML = "";
-  for (var i = 0; i < 10; i++) {
-    var p = document.createElement("div");
-    var c = i % 2 === 0 ? "#C9A84C" : "#A8D5BA";
-    p.style.cssText = "position:absolute;width:4px;height:4px;border-radius:50%;background:" + c + ";" +
-      "--a:" + (i * 36) + "deg;--d:" + (25 + Math.random() * 25) + "px;" +
-      "animation:burstOut 0.7s " + (i * 0.03) + "s ease-out forwards;opacity:0";
-    burstEl.appendChild(p);
-  }
-  setTimeout(function() { burstEl.innerHTML = ""; }, 1000);
-}
-
-setInterval(function() { if (currentFillPct > 5) spawnBubble(); }, 800);
-
-socket.on("state", updateUI);
+// Local tick every 100ms so the timer updates smoothly even between server broadcasts
+setInterval(render, 200);
 </script>
 </body>
 </html>
